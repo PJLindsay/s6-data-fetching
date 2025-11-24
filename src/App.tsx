@@ -15,6 +15,7 @@ const expectedResponseDataSchema = z.array(rawDataBlogPostSchema)
 import BlogPosts, { BlogPost } from './components/BlogPosts.tsx'
 import { get } from './util/http.ts'
 import fetchingImage from './assets/data-fetching.png'
+import ErrorMessage from './components/ErrorMessage.tsx'
 
 type RawDataBlogPost = {
   id: number
@@ -32,8 +33,10 @@ function App() {
     async function fetchPosts() {
       setIsFetching(true)
       try {
-
-        const data = await get('https://jsonplaceholder.typicode.com/posts', z.array(rawDataBlogPostSchema));
+        const data = await get(
+          'https://jsonplaceholder.typicode.com/posts',
+          z.array(rawDataBlogPostSchema)
+        )
 
         const parsedData = expectedResponseDataSchema.parse(data)
         // No more type casting via "as" needed!
@@ -61,12 +64,17 @@ function App() {
   }, [])
 
   let content: ReactNode
-  if (isFetching) {
-    content = <p>Loading...</p>
+
+  if (error) {
+    content = <ErrorMessage text={error} />
   }
 
   if (fetchedPosts) {
     content = <BlogPosts posts={fetchedPosts} />
+  }
+
+  if (isFetching) {
+    content = <p id="loading-fallback">Fetching posts...</p>
   }
 
   return (
